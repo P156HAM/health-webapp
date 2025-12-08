@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from '../../ui/preventive-plan-dialog'
 import { useAuth } from '../../../auth/AuthProvider'
+import { isMockMode } from '../../../mocks/config'
 
 interface AnomalyCheckboxFormProps {
   setTriggerDialog: (trigger: () => void) => void
@@ -150,39 +151,60 @@ const AnomalyCheckboxForm = ({ setTriggerDialog, userUid }: AnomalyCheckboxFormP
       setIsLoading(true)
 
       const fetchedResults: ResultType = { ...cachedResults }
-      const idToken = user && (await user.getIdToken(true))
-      for (const metric of metricsToFetch) {
-        const response = await fetch(`${BASE_URL}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
-          },
-          body: JSON.stringify({ subcollection_name: metric, patient_uid: userUid }),
-        })
 
-        let fetchedResult = await response.json()
-
-        if (typeof fetchedResult === 'string') {
-          fetchedResult = JSON.parse(fetchedResult)
-        }
-
-        if (typeof fetchedResult.anomalies === 'string') {
-          const anomalies = JSON.parse(fetchedResult.anomalies)
+      if (isMockMode) {
+        metricsToFetch.forEach((metric) => {
           fetchedResults[metric] = {
-            status: fetchedResult.status,
-            anomalies: anomalies.map((item: AnomalyData) => ({
-              ...item,
-              displayName: displayNames[metric],
-            })),
+            status: 'anomalies_detected',
+            anomalies: [
+              {
+                start_time: '08:00',
+                end_time: '10:00',
+                displayName: displayNames[metric],
+              },
+              {
+                start_time: '18:00',
+                end_time: '19:00',
+                displayName: displayNames[metric],
+              },
+            ],
           }
-        } else {
-          fetchedResults[metric] = {
-            status: fetchedResult.status,
-            anomalies: fetchedResult.anomalies.map((item: AnomalyData) => ({
-              ...item,
-              displayName: displayNames[metric],
-            })),
+        })
+      } else {
+        const idToken = user && (await user.getIdToken(true))
+        for (const metric of metricsToFetch) {
+          const response = await fetch(`${BASE_URL}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}),
+            },
+            body: JSON.stringify({ subcollection_name: metric, patient_uid: userUid }),
+          })
+
+          let fetchedResult = await response.json()
+
+          if (typeof fetchedResult === 'string') {
+            fetchedResult = JSON.parse(fetchedResult)
+          }
+
+          if (typeof fetchedResult.anomalies === 'string') {
+            const anomalies = JSON.parse(fetchedResult.anomalies)
+            fetchedResults[metric] = {
+              status: fetchedResult.status,
+              anomalies: anomalies.map((item: AnomalyData) => ({
+                ...item,
+                displayName: displayNames[metric],
+              })),
+            }
+          } else {
+            fetchedResults[metric] = {
+              status: fetchedResult.status,
+              anomalies: fetchedResult.anomalies.map((item: AnomalyData) => ({
+                ...item,
+                displayName: displayNames[metric],
+              })),
+            }
           }
         }
       }

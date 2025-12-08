@@ -157,6 +157,7 @@ export interface DataSummary {
   sleepBreathsSummary: SleepBreathsSummary[][]
   sleepHeartRateSummary: SleepHeartRateSummary[][]
   selfReportedSymptoms: SelfReportedSymptoms[][]
+  dailyScoresSummary?: DailyScoreSummary[][]
 }
 
 export interface Thresholds {

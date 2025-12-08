@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button'
 import { PlusIcon, Cross2Icon, MixerHorizontalIcon } from '@radix-ui/react-icons'
 import { db } from '../../firebase/firebase'
 import { doc, getDoc } from 'firebase/firestore'
+import { isMockMode } from '../../mocks/config'
 import {
   Table,
   TableBody,
@@ -43,6 +44,35 @@ function AccountTable() {
   const pageSize = 8
 
   const fetchHealthcareProfessionals = async () => {
+    if (isMockMode) {
+      setAccounts([
+        {
+          uid: 'mock-user-1',
+          firstName: 'Dana',
+          lastName: 'Care',
+          email: 'dana.care@demo.clinic',
+          isActive: true,
+          isAdmin: true,
+        },
+        {
+          uid: 'mock-user-2',
+          firstName: 'Leo',
+          lastName: 'Heart',
+          email: 'leo.heart@demo.clinic',
+          isActive: false,
+          isAdmin: false,
+        },
+        {
+          uid: 'mock-user-3',
+          firstName: 'Mia',
+          lastName: 'Sleep',
+          email: 'mia.sleep@demo.clinic',
+          isActive: true,
+          isAdmin: false,
+        },
+      ])
+      return
+    }
     if (userData?.clinicID) {
       try {
         setLoading(true)

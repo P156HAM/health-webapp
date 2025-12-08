@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { doc, getDoc, getFirestore } from 'firebase/firestore'
 import { Patient } from '../constants/types'
+import { isMockMode } from '../mocks/config'
+import { getMockPatient } from '../mocks/services'
 
 export const useFetchPatient = (id: string) => {
   const [patient, setPatient] = useState<Patient | null>(null)
@@ -9,6 +11,14 @@ export const useFetchPatient = (id: string) => {
 
   useEffect(() => {
     if (!id || typeof id !== 'string') return
+
+    if (isMockMode) {
+      getMockPatient(id)
+        .then((mock) => setPatient(mock))
+        .catch(() => setError('Failed to load mock patient'))
+        .finally(() => setLoading(false))
+      return
+    }
 
     const fetchPatientByUID = async (id: string) => {
       //console.log('patient id', id)

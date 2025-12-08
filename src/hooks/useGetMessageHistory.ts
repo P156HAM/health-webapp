@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { httpsCallable } from 'firebase/functions'
 import { functions } from '../firebase/firebase'
 import { useTranslation } from 'react-i18next'
+import { isMockMode } from '../mocks/config'
+import { getMockMessages } from '../mocks/services'
 
 interface Message {
   clinicName: string
@@ -28,6 +30,11 @@ const useMessageHistory = (patientUID: string, healthcareProfessionalUID: string
       setError(null)
 
       try {
+        if (isMockMode) {
+          const mock = await getMockMessages()
+          setMessageHistory(mock as any)
+          return
+        }
         const getMessages = httpsCallable<
           { patientUID: string; healthcareProfessionalUID: string },
           GetMessagesResponse

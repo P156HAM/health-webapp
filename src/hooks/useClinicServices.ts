@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { db } from '../firebase/firebase'
 import { doc, getDoc } from 'firebase/firestore'
 import { useAuth } from '../auth/AuthProvider'
+import { isMockMode } from '../mocks/config'
 
 interface UserData {
   clinicID: string
@@ -25,6 +26,17 @@ const useClinicServices = (userData: UserData | null) => {
   const { user } = useAuth()
 
   const getClinicData = async (clinicID: string): Promise<ClinicData | null> => {
+    if (isMockMode) {
+      return {
+        stripe_customer_id: 'mock_stripe_customer',
+        stripe_subscription_id: 'mock_subscription',
+        healthcareProfessionals: {
+          hp1: 'mock-user-1',
+          hp2: 'mock-user-2',
+          hp3: 'mock-user-3',
+        },
+      }
+    }
     try {
       const clinicRef = doc(db, 'clinics', clinicID)
       const clinicSnap = await getDoc(clinicRef)
@@ -45,6 +57,9 @@ const useClinicServices = (userData: UserData | null) => {
     url: string,
     payload: object
   ): Promise<StripeSessionResponse> => {
+    if (isMockMode) {
+      return { url: 'https://example.com/mock-stripe' }
+    }
     try {
       const idToken = user && (await user.getIdToken(true))
       const response = await fetch(url, {
@@ -70,6 +85,10 @@ const useClinicServices = (userData: UserData | null) => {
 
   const goToDashboard = async () => {
     if (!userData) {
+      return
+    }
+    if (isMockMode) {
+      console.info('Mock Stripe dashboard redirect', userData.clinicID)
       return
     }
 
@@ -100,6 +119,10 @@ const useClinicServices = (userData: UserData | null) => {
 
   const goToPayment = async () => {
     if (!userData) {
+      return
+    }
+    if (isMockMode) {
+      console.info('Mock Stripe payment redirect', userData.clinicID)
       return
     }
 
@@ -144,6 +167,9 @@ const useClinicServices = (userData: UserData | null) => {
   const hasInactiveDoctors = async (): Promise<boolean> => {
     if (!userData) {
       return false
+    }
+    if (isMockMode) {
+      return true
     }
 
     try {
@@ -203,6 +229,9 @@ const useClinicServices = (userData: UserData | null) => {
   const isPaymentReceived = async (): Promise<boolean> => {
     if (!userData) {
       return false
+    }
+    if (isMockMode) {
+      return true
     }
 
     try {

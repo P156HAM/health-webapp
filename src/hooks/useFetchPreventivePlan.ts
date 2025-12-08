@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { collection, getDocs, DocumentData, Timestamp } from 'firebase/firestore'
 import { db } from '../firebase/firebase'
+import { isMockMode } from '../mocks/config'
+import { getMockPreventionPlans } from '../mocks/services'
 
 interface PreventivePlan {
   id: string
@@ -17,6 +19,14 @@ const useFetchPreventivePlan = (userUID: string, shouldFetch: boolean) => {
 
   useEffect(() => {
     if (!shouldFetch) return
+
+    if (isMockMode) {
+      getMockPreventionPlans(userUID)
+        .then((plans) => setPreventivePlan(plans as any))
+        .catch((error) => setError((error as Error).message))
+        .finally(() => setLoading(false))
+      return
+    }
 
     const fetchPlans = async () => {
       try {

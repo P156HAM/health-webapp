@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext, useCallback } from 'react'
 import { auth, db } from '../firebase/firebase'
 import { collection, doc, getDoc, getDocs, limit, orderBy, query } from 'firebase/firestore'
+import { isMockMode } from '../mocks/config'
+import { getMockPatientSummary, getMockPreventionPlans } from '../mocks/services'
 
 interface LTRServicesContextProps {
   data: any
@@ -27,6 +29,12 @@ const LTRServicesProvider = ({ children }: LTRServicesProviderProps) => {
   const fetchPatientData = useCallback(async (id: string): Promise<void> => {
     setLoading(true)
     try {
+      if (isMockMode) {
+        const result = await getMockPatientSummary(id)
+        setData(result)
+        setError(null)
+        return
+      }
       const idToken = await auth.currentUser?.getIdToken(true)
       const response = await fetch(`${BASE_URL}/patientsummary/${id}`, {
         headers: {
@@ -54,6 +62,11 @@ const LTRServicesProvider = ({ children }: LTRServicesProviderProps) => {
   }, [])
 
   const fetchPreventionPlans = useCallback(async (id: string): Promise<void> => {
+    if (isMockMode) {
+      const plans = await getMockPreventionPlans(id)
+      setSelectedPreventionPlan(plans[0] ?? null)
+      return
+    }
     const docRef = collection(db, 'patients', id, 'preventivePlans')
     const querySnapshot = await getDocs(query(docRef, orderBy('createdAt', 'desc'), limit(1)))
     if (!querySnapshot.empty) {

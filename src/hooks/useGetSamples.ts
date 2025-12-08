@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { auth } from '../firebase/firebase'
+import { isMockMode } from '../mocks/config'
+import { getMockSamples } from '../mocks/services'
 
 const BASE_URL = process.env.REACT_APP_LONG_TERM_REPORT_URL
 const useGetSamples = (id?: string, date?: string) => {
@@ -10,6 +12,11 @@ const useGetSamples = (id?: string, date?: string) => {
   useEffect(() => {
     const fetchData = async (id: string, date: string) => {
       try {
+        if (isMockMode) {
+          const mock = await getMockSamples()
+          setData(mock)
+          return
+        }
         const idToken = await auth.currentUser?.getIdToken(true)
         const response = await fetch(`${BASE_URL}/samples/${id}/${date}/`, {
           headers: {

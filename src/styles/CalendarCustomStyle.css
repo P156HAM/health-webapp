@@ -1,0 +1,118 @@
+/* customCalendar.css */
+
+
+/* General Calendar styles */
+.rs-calendar {}
+
+/* Table styles */
+.rs-calendar-table {}
+
+
+/* Sets the text color and weight of the date in each cell*/
+.rs-calendar-table-cell-day {
+    font-weight: normal;
+    font-size: small;
+    color: black;
+}
+
+/* Sets the "Current Day" indicator background */
+.rs-calendar-panel .rs-calendar-table-cell-is-today .rs-calendar-table-cell-day {
+    background-color: transparent;
+    color: black;
+}
+
+.rs-calendar-panel:not(.rs-calendar-compact) .rs-calendar-table-row:not(.rs-calendar-table-header-row) .rs-calendar-table-cell-content {
+    height: 100%;
+    border: none;
+}
+
+.rs-calendar-panel .rs-calendar-table-cell-selected .rs-calendar-table-cell-content * {
+    -webkit-box-shadow: inset 0 0 0 0px #3498ff
+}
+
+
+.rs-calendar-table-cell[aria-label] {
+    content: none;
+    /* Prevent pointer events on the cell to avoid showing the tooltip */
+}
+
+/* Cell styles */
+.rs-calendar-table-cell {
+    border: 2px solid #ffffff;
+    border-radius: 6px;
+    text-align: center;
+    height: 125px;
+}
+
+/* Selected day cell */
+.rs-calendar-table-cell-content {
+    background-color: transparent;
+    padding: 0px;
+    height: 125px;
+}
+
+.rs-calendar-table-cell-content:hover {
+    background-color: transparent;
+}
+
+.rs-calendar-table-cell-un-same-month * {
+    color: black;
+}
+
+/* Header styles */
+.rs-calendar-header {}
+
+/* Month toolbar styles */
+.rs-calendar-month-toolbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+/* Header title styles */
+.rs-calendar-header-title {
+    font-weight: bold;
+}
+
+.rs-calendar-body {
+    margin-top: 10px;
+}
+
+/* Header title button styles */
+.rs-calendar-header-title-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: 200;
+}
+
+/* Setting color of month-text */
+.rs-btn-subtle:disabled,
+.rs-btn-subtle.rs-btn-disabled {
+    color: black;
+    cursor: default;
+}
+
+.rs-calendar-header-title {
+    font-weight: normal;
+    color: black;
+}
+
+/* Removes the blue inner border on selected date*/
+.rs-calendar-panel:not(.rs-calendar-compact) .rs-calendar-table-row:not(.rs-calendar-table-header-row) .rs-calendar-table-cell-content {
+    box-shadow: unset;
+}
+
+.rs-calendar-bordered .rs-calendar-table-row:not(:last-child) .rs-calendar-table-cell,
+.rs-calendar-bordered .rs-calendar-table-header-row .rs-calendar-table-header-cell {
+    border-bottom: 0px;
+}
+
+/* Month and year dropdown styles */
+.rs-calendar-month-dropdown,
+.rs-calendar-year-dropdown {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    color: #333;
+}

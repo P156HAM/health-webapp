@@ -2,37 +2,28 @@
 
 ## Running the Project
 
-### Development (Mock Mode - Recommended for Portfolio)
+### Development
 
-**Easy way (no env files needed):**
-```bash
-npm run start:mock
-```
-
-This starts the development server with mock data enabled. The app will run on `http://localhost:3000` (or the next available port).
-
-### Development (With Real Backend)
-
-If you have `.env.dev` file configured:
 ```bash
 npm start
 ```
 
-### Available Scripts
+This starts the development server with mock data enabled. The app will run on `http://localhost:3000` (or the next available port).
 
-- `npm run start:mock` - Start dev server with mock data (no env files needed)
-- `npm start` - Start dev server with real backend (requires `.env.dev`)
-- `npm run start:prod` - Start production server locally (requires `.env.prod`)
-- `npm run build:mock` - Build for production with mock mode enabled
-- `npm run build:prod` - Build for production with real backend (requires `.env.prod`)
+### Build for Production
+
+```bash
+npm run build
+```
+
+This creates an optimized production build in the `build/` directory with mock data enabled.
 
 ## Mock/demo mode
 
-- Run with mock data: `npm run start:mock` (easiest way)
-- Or set `REACT_APP_USE_MOCKS=true` in your env file
+- Mock mode is **enabled by default** in both `npm start` and `npm run build`
 - Mock fixtures live in `src/mocks/` and cover auth, patients, reports, samples, messages, and preventive plans.
-- When the flag is on, all Firebase/API calls are bypassed and replaced with local promises plus small artificial delay.
-- In mock mode, the login page shows a simple "Login" button (no credentials needed).
+- All Firebase/API calls are bypassed and replaced with local promises plus small artificial delay.
+- The login page shows a simple "Login" button (no credentials needed).
 
 ### Notes/limitations
 

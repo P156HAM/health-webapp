@@ -71,14 +71,8 @@
     "zod": "^3.23.8"
   },
   "scripts": {
-    "start": "NODE_ENV=development dotenv -e .env.dev react-scripts start",
-    "start:mock": "REACT_APP_USE_MOCKS=true react-scripts start",
-    "start:prod": "NODE_ENV=production dotenv -e .env.prod react-scripts start",
-    "build": "REACT_APP_USE_MOCKS=true GENERATE_SOURCEMAP=false react-scripts build",
-    "build:dev": "GENERATE_SOURCEMAP=false dotenv -e .env.development react-scripts build && npm run obfuscate",
-    "build:prod": "GENERATE_SOURCEMAP=false NODE_ENV=production dotenv -e .env.prod react-scripts build && npm run obfuscate",
-    "build:mock": "REACT_APP_USE_MOCKS=true GENERATE_SOURCEMAP=false react-scripts build",
-    "obfuscate": "node scripts/obfuscate.js",
+    "start": "REACT_APP_USE_MOCKS=true react-scripts start",
+    "build": "CI=false REACT_APP_USE_MOCKS=true GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

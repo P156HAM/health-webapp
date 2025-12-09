@@ -18,15 +18,26 @@ import { FileTextIcon } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from 'src/components/ui/sheet'
 import { useAuth } from '../../auth/AuthProvider'
 import { useLogSnag } from '@logsnag/react'
+import { useNavigate } from 'react-router-dom'
+import { isMockMode } from '../../mocks/config'
 
 function NavigationMenu() {
   const [translation] = useTranslation('global')
   const auth = getAuth()
-  const { userData } = useAuth()
+  const { userData, logout } = useAuth()
   const { track } = useLogSnag()
+  const navigate = useNavigate()
 
   const handleLogout = async () => {
     try {
+      // Handle mock mode logout
+      if (isMockMode && logout) {
+        logout()
+        localStorage.removeItem('mockAuthState')
+        navigate('/')
+        return
+      }
+
       const loginTime = localStorage.getItem('loginTime')
 
       if (loginTime) {

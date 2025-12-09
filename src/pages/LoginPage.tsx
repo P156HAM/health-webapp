@@ -13,6 +13,7 @@ import ForgotPassword from '../components/containers/ForgotPassword'
 import backgroundImage from '../assets/HCPP.png'
 import { ArrowLeft } from 'lucide-react'
 import { useLogSnag } from '@logsnag/react'
+import { isMockMode } from '../mocks/config'
 
 function LoginPage() {
   const [translation, i18next] = useTranslation('global')
@@ -26,6 +27,20 @@ function LoginPage() {
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault()
+
+    // In mock mode, set auth state and navigate to dashboard
+    if (isMockMode) {
+      setLoading(true)
+      // Small delay to simulate login
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      localStorage.setItem('mockAuthState', 'loggedIn')
+      // Dispatch custom event to notify AuthProvider
+      window.dispatchEvent(new Event('mockAuthStateChanged'))
+      // Use navigate instead of window.location for better React Router integration
+      navigate('/dashboard')
+      setLoading(false)
+      return
+    }
 
     if (email.trim() === '' || password.trim() === '') {
       setError('Insert your email and password.')
@@ -191,73 +206,105 @@ function LoginPage() {
                 <CardDescription>{translation('landingPage.Login.login_subtext')}</CardDescription>
               </CardHeader>
               <div className="flex flex-col">
-                <form className="mt-14" onSubmit={handleLogin} title="Login Form" noValidate>
-                  <div className="flex flex-col gap-2">
-                    <div>
-                      <p className="text-xs font-medium mb-1">
-                        {translation('landingPage.Login.email')}
-                      </p>
-                      <Input
-                        id="email"
-                        placeholder={translation('landingPage.Login.email_placeholder')}
-                        required
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-medium mb-1">
-                        {translation('landingPage.Login.password')}
-                      </p>
-                      <Input
-                        id="password"
-                        placeholder={translation('landingPage.Login.password_placeholder')}
-                        required
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                      />
-                      <div className="mt-2">
+                {isMockMode ? (
+                  <form className="mt-14" onSubmit={handleLogin} title="Login Form" noValidate>
+                    <div className="flex flex-col gap-2">
+                      <div className="bg-blue-50 border border-blue-200 text-sm rounded-sm p-4 text-blue-700 mb-4">
+                        <p className="font-light text-sm">
+                          Demo Mode: Click the button below to access the dashboard with sample
+                          data.
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2 mt-6">
                         <Button
-                          type="button"
-                          variant="link"
-                          className="text-blue-600 text-sm font-normal ml-0 pl-0 text-xs"
-                          onClick={toggleForgotPassword}
+                          className="w-full px-6 py-6 text-sm"
+                          size="lg"
+                          type="submit"
+                          variant="default"
                         >
-                          {translation('landingPage.Login.forgot_password')}
+                          {translation('landingPage.Login.login_button')}
+                        </Button>
+                        <Button
+                          className="w-full px-6 py-6 text-sm"
+                          size="lg"
+                          variant="outline"
+                          type="button"
+                          onClick={toRegister}
+                        >
+                          {translation('landingPage.Login.register_button')}
                         </Button>
                       </div>
                     </div>
-
-                    {error && (
-                      <div className="bg-red-100 text-sm rounded-sm p-4 text-red-700">
-                        <p className="font-light text-sm">{error}</p>
+                  </form>
+                ) : (
+                  <form className="mt-14" onSubmit={handleLogin} title="Login Form" noValidate>
+                    <div className="flex flex-col gap-2">
+                      <div>
+                        <p className="text-xs font-medium mb-1">
+                          {translation('landingPage.Login.email')}
+                        </p>
+                        <Input
+                          id="email"
+                          placeholder={translation('landingPage.Login.email_placeholder')}
+                          required
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
                       </div>
-                    )}
 
-                    <div className="flex flex-col gap-2 mt-6">
-                      <Button
-                        className="w-full px-6 py-6 text-sm"
-                        size="lg"
-                        type="submit"
-                        variant="default"
-                      >
-                        {translation('landingPage.Login.login_button')}
-                      </Button>
-                      <Button
-                        className="w-full px-6 py-6 text-sm"
-                        size="lg"
-                        variant="outline"
-                        type="button"
-                        onClick={toRegister}
-                      >
-                        {translation('landingPage.Login.register_button')}
-                      </Button>
+                      <div>
+                        <p className="text-xs font-medium mb-1">
+                          {translation('landingPage.Login.password')}
+                        </p>
+                        <Input
+                          id="password"
+                          placeholder={translation('landingPage.Login.password_placeholder')}
+                          required
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <div className="mt-2">
+                          <Button
+                            type="button"
+                            variant="link"
+                            className="text-blue-600 text-sm font-normal ml-0 pl-0 text-xs"
+                            onClick={toggleForgotPassword}
+                          >
+                            {translation('landingPage.Login.forgot_password')}
+                          </Button>
+                        </div>
+                      </div>
+
+                      {error && (
+                        <div className="bg-red-100 text-sm rounded-sm p-4 text-red-700">
+                          <p className="font-light text-sm">{error}</p>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-2 mt-6">
+                        <Button
+                          className="w-full px-6 py-6 text-sm"
+                          size="lg"
+                          type="submit"
+                          variant="default"
+                        >
+                          {translation('landingPage.Login.login_button')}
+                        </Button>
+                        <Button
+                          className="w-full px-6 py-6 text-sm"
+                          size="lg"
+                          variant="outline"
+                          type="button"
+                          onClick={toRegister}
+                        >
+                          {translation('landingPage.Login.register_button')}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                )}
               </div>
             </Card>
           </div>

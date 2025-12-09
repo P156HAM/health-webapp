@@ -31,6 +31,7 @@ interface AuthContextType {
   isFetching: boolean
   isActive: boolean | null // New state for subscription status
   error: string | null
+  logout?: () => void // Add logout function for mock mode
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -40,21 +41,101 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [userData, setUserData] = useState<HealthcareProfessionalData | null>(null)
-  const [isFetching, setFetching] = useState(true)
-  const [isActive, setIsActive] = useState(true)
+  // In mock mode, initialize state based on localStorage immediately
+  const getInitialMockState = () => {
+    if (isMockMode) {
+      const mockAuthState = localStorage.getItem('mockAuthState')
+      if (mockAuthState === 'loggedIn') {
+        const mockUser = getMockUser()
+        const mockUserData = getMockUserData()
+        return {
+          user: mockUser,
+          userData: mockUserData as any,
+          isActive: mockUserData.isActive,
+          isFetching: false,
+        }
+      }
+      return {
+        user: null,
+        userData: null,
+        isActive: true,
+        isFetching: false,
+      }
+    }
+    return {
+      user: null,
+      userData: null,
+      isActive: true,
+      isFetching: true,
+    }
+  }
+
+  const initialState = getInitialMockState()
+  const [user, setUser] = useState<User | null>(initialState.user)
+  const [userData, setUserData] = useState<HealthcareProfessionalData | null>(initialState.userData)
+  const [isFetching, setFetching] = useState(initialState.isFetching)
+  const [isActive, setIsActive] = useState(initialState.isActive)
   const [error, setError] = useState<string | null>(null)
+
+  // Expose logout function for mock mode
+  const handleMockLogout = () => {
+    if (isMockMode) {
+      setUser(null)
+      setUserData(null)
+      setIsActive(true)
+      setError(null)
+      localStorage.removeItem('loginTime')
+      localStorage.removeItem('mockAuthState')
+    }
+  }
 
   useEffect(() => {
     if (isMockMode) {
-      const mockUser = getMockUser()
-      const mockUserData = getMockUserData()
-      setUser(mockUser)
-      setUserData(mockUserData as any)
-      setIsActive(mockUserData.isActive)
-      setError(null)
+      // Function to check and update mock auth state
+      const checkMockAuth = () => {
+        const mockAuthState = localStorage.getItem('mockAuthState')
+        if (mockAuthState === 'loggedIn') {
+          const mockUser = getMockUser()
+          const mockUserData = getMockUserData()
+          setUser(mockUser)
+          setUserData(mockUserData as any)
+          setIsActive(mockUserData.isActive)
+          setError(null)
+        } else {
+          setUser(null)
+          setUserData(null)
+        }
+        setFetching(false)
+      }
+
+      // Check immediately
+      checkMockAuth()
+
+      // Listen for custom event when login happens (same tab)
+      const handleMockAuthChange = () => {
+        checkMockAuth()
+      }
+
+      // Listen for storage changes (when login happens in different tab)
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'mockAuthState') {
+          checkMockAuth()
+        }
+      }
+
+      window.addEventListener('mockAuthStateChanged', handleMockAuthChange)
+      window.addEventListener('storage', handleStorageChange)
+
+      return () => {
+        window.removeEventListener('mockAuthStateChanged', handleMockAuthChange)
+        window.removeEventListener('storage', handleStorageChange)
+      }
+    }
+
+    // Only proceed with Firebase auth if not in mock mode
+    if (!auth) {
       setFetching(false)
+      setError('Firebase not initialized')
       return
     }
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -102,7 +183,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, userData, isFetching, isActive, error }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userData,
+        isFetching,
+        isActive,
+        error,
+        logout: isMockMode ? handleMockLogout : undefined,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
